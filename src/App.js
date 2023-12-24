@@ -1,23 +1,70 @@
-import logo from './logo.svg';
+import React,{useState} from 'react';
 import './App.css';
+import { Board } from './components/Board';
+import { ScoreBoard } from './components/ScoreBoard';
+import { ResetButton } from './components/ResetButton';
 
 function App() {
+  const WIN_CONDITIONS = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8],
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+    [0,4,8],
+    [2,4,6]
+  ]
+  const [gameOver, SetGameOver] = useState(false);
+  const [scores, setScores] = useState ({xScore:0, oScore:0})
+  const [board, setBoard] = useState(Array(9).fill(null))
+  const [xPlaying, SetXplaying] = useState(false);
+  const handleBoxClick = (boxId) =>{
+    const updateBoard = board.map((value,id) =>{
+      if(id === boxId){
+        return xPlaying === true ? "X" : "O"
+      }else{
+        return value;
+      }
+    })
+    const winner = checkWinner(updateBoard);
+    if(winner){
+      if(winner === "O"){
+        let {oScore } = scores;
+      oScore +=1;
+      setScores({...scores, oScore});
+      }else{
+      let {xScore } = scores;
+      xScore +=1;
+      setScores({...scores, xScore});
+   
+    }
+  }
+  console.log(scores)
+    setBoard(updateBoard);
+    SetXplaying(!xPlaying);
+  }
+  const checkWinner = (board) =>{
+    for(let i = 0; i < WIN_CONDITIONS.length; i++){
+      const [x,y,z] = WIN_CONDITIONS[i];
+      
+      if(board[x] && board[x] === board[y] && board[y] === board[z]){
+       SetGameOver(true);
+        return board[x];
+      }
+    }
+  }
+  const resetBoard = () =>{
+    SetGameOver(false);
+    setBoard(Array(9).fill(null));
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>tic tac toe game</h1>
+      <ScoreBoard  scores ={scores} xPlaying={xPlaying}/>
+      <Board  board = {board} onclick={gameOver ? resetBoard : handleBoxClick}/>
+      <ResetButton resetBoard={resetBoard} />
+    
     </div>
   );
 }
